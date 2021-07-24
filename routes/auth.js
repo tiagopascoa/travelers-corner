@@ -5,10 +5,10 @@ const bcrypt = require("bcryptjs");
 
 
 router.post("/signup", async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, email, imageUrl } = req.body;
   //check if username and password are filled in
-  if (username === "" || password === "") {
-    res.status(400).json({ message: "Fill username and password" });
+  if (username === "" || password === "" || email === "") {
+    res.status(400).json({ message: "Please fill in username, email and password" });
     return;
   }
   //check for password strength
@@ -26,11 +26,19 @@ router.post("/signup", async (req, res) => {
   const saltRounds = 10;
   const salt = bcrypt.genSaltSync(saltRounds);
   const hashedPassword = bcrypt.hashSync(password, salt);
-  const newUser = await User.create({
-    username,
-    password: hashedPassword,
-  });
-  res.status(200).json(newUser);
+  try {
+    const newUser = await User.create({
+      username,
+      password: hashedPassword,
+      email,
+      imageUrl
+    });
+    res.status(200).json(newUser);
+  } catch (e) {
+    res.status(500).json(e)
+  }
+  
+
 });
 
 router.post("/login", async (req, res) => {
@@ -66,7 +74,7 @@ router.get("/loggedin", (req, res) => {
       res.status(200).json(req.session.currentUser);
       return;
     } else {
-      res.status(401).json({ message: "user logged out" });
+      res.status(200).json({});
     }
   });
 

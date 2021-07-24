@@ -19,15 +19,19 @@ const travelPost = new Schema({
         type: String,
         
     },
-    likeCount: {
-        type: Number,
-        default: 0,
+    like: {
+        type: Schema.Types.ObjectId,
+        ref: "Like"
     },
     comments: [{
         user: String,
         comment: String,
     }],
-      
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+    },
+    
     
 },
 {timestamps: true}

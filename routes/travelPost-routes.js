@@ -1,13 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const TravelPost = require('../models/TravelPost.model');
+const User = require('../models/User.model');
+const Like = require('../models/Like.model');
 const fileUpload = require("../config/cloudinary");
 
 
 //Get all Travel Posts
-router.get("/travel-posts", async (req, res) => {
+router.get("/main", async (req, res) => {
     try {
-        const allTravelPosts = await TravelPost.find();
+        const allTravelPosts = await TravelPost.find().populate("user");
         console.log(allTravelPosts)
         res.status(200).json(allTravelPosts); 
     } catch (e) {
@@ -16,12 +18,12 @@ router.get("/travel-posts", async (req, res) => {
 }); 
 
 //Create Travel Post 
-router.post("/travel-posts/new", async (req, res) => {
+router.post("/new-travel-post", async (req, res) => {
 
-    const {title, location, description, tags, imageUrl} = req.body;
+    const {title, location, description, tags, imageUrl, like} = req.body;
 
     if (!title || !description || !location) {
-        res.status(400).json({ message: "missing fields"});
+        res.status(400).json({ message: "missing fields (title, description and location are required)"});
         return;
     }
 
@@ -31,7 +33,9 @@ router.post("/travel-posts/new", async (req, res) => {
           location,
           description,
           tags,
-          imageUrl
+          imageUrl,
+          like,
+          user: req.session.currentUser
         });
         res.status(200).json(response);
       } catch (e) {
@@ -69,19 +73,46 @@ router.get("/travel-posts/:id", async (req, res) => {
   }
 });
 
-//Update project 
+//Update 
 router.put("/travel-posts/:id", async (req, res) => {
   try {
     const { title, description, location } = req.body;
     await TravelPost.findByIdAndUpdate(req.params.id, {
       title,
       description,
-      location
+      location,
     });
     res.status(200).json(`id ${req.params.id} was updated`);
   } catch (e) {
     res.status(500).json({ message: `error occurred ${e}` });
   }
 });
+
+//Likes
+router.post("/travel-post/:id/like", async (req, res) => {
+  try {
+    const user = await User.findById(req.session.currentUser._id);
+    const travelPost = await TravelPost.findById(req.params.id);
+    const like = await Like.create({user, travelPost});
+    await TravelPost.findByIdAndUpdate(travelPost._id, {
+      $push: {
+        like: like
+      }
+    })
+    res.status(200).json({ message: `liike added ${like}`});
+  } catch (e) {
+    res.status(500).json({ message: `error occurred ${e}` });
+  }
+});
+
+router.get("/likes", async (req,res) => {
+  try {
+    const allLikes = await Like.find()
+    console.log(allLikes)
+    res.status(200).json(allLikes); 
+} catch (e) {
+    res.status(500).json({message: `erro occurred ${e}`});
+}  
+})
 
 module.exports = router;
