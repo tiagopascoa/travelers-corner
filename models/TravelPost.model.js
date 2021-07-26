@@ -2,10 +2,6 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const travelPost = new Schema({
-    title: {
-        type: String,
-        
-    },
     location: {
         type: String,
         
@@ -23,10 +19,7 @@ const travelPost = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Like"
     },
-    comments: [{
-        user: String,
-        comment: String,
-    }],
+    comments: [String],
     user: {
         type: Schema.Types.ObjectId,
         ref: "User",

@@ -15,7 +15,7 @@ router.get("/user-area", async (req, res) => {
  //User Profile
  router.get("/user-profile/:userId", async (req, res) => {
     try {
-        const userProfile = await User.findById(req.params.userId);
+        const userProfile = await User.findById(req.params.userId).populate("travelPosts");
         res.status(200).json(userProfile); 
     } catch (e) {
         res.status(500).json({message: `erro occurred ${e}`});

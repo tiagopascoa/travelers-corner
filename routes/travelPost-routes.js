@@ -20,16 +20,15 @@ router.get("/main", async (req, res) => {
 //Create Travel Post 
 router.post("/new-travel-post", async (req, res) => {
 
-    const {title, location, description, tags, imageUrl, like} = req.body;
+    const {location, description, tags, imageUrl, like} = req.body;
 
-    if (!title || !description || !location) {
+    if (!description || !location) {
         res.status(400).json({ message: "missing fields (title, description and location are required)"});
         return;
     }
 
     try {
         const response = await TravelPost.create({
-          title,
           location,
           description,
           tags,
@@ -42,6 +41,21 @@ router.post("/new-travel-post", async (req, res) => {
         res.status(500).json({ message: `error occurred ${e}` });
       } 
 
+});
+
+//Create Comment
+router.post("/travel-posts/:id/comments", async (req, res) => {
+  try {
+    const { comments } = req.body; 
+    await TravelPost.findByIdAndUpdate(req.params.id, {
+      $push: {
+        comments: comments
+      },
+    });
+    res.status(200).json(`id ${req.params.id} was updated`);
+  } catch (e) {
+    res.status(500).json({ message: `error occurred ${e}` });
+  }
 });
 
 //Upload image to cloudinary
@@ -66,7 +80,7 @@ router.delete("/travel-posts/:id", async (req, res) => {
 //Get Travel Post by Id
 router.get("/travel-posts/:id", async (req, res) => {
   try {
-    const travelPost = await TravelPost.findById(req.params.id);
+    const travelPost = await TravelPost.findById(req.params.id).populate("user");
     res.status(200).json(travelPost)
   } catch (e) {
     res.status(500).json({ message: `error occurred ${e}` });
@@ -76,9 +90,8 @@ router.get("/travel-posts/:id", async (req, res) => {
 //Update 
 router.put("/travel-posts/:id", async (req, res) => {
   try {
-    const { title, description, location } = req.body;
+    const { description, location } = req.body;
     await TravelPost.findByIdAndUpdate(req.params.id, {
-      title,
       description,
       location,
     });
@@ -88,26 +101,44 @@ router.put("/travel-posts/:id", async (req, res) => {
   }
 });
 
+
+
+
 //Likes
 router.post("/travel-post/:id/like", async (req, res) => {
   try {
     const user = await User.findById(req.session.currentUser._id);
     const travelPost = await TravelPost.findById(req.params.id);
-    const like = await Like.create({user, travelPost});
-    await TravelPost.findByIdAndUpdate(travelPost._id, {
+
+     const existingLike = await Like.find({
+      user:user,
+      travelPost:travelPost,
+    }); 
+
+     if(!existingLike){ 
+      const like = await Like.create({user, travelPost});
+    const updatedTravel = await TravelPost.findByIdAndUpdate(travelPost._id, {
       $push: {
         like: like
       }
-    })
-    res.status(200).json({ message: `liike added ${like}`});
+    }, {new: true})
+    res.status(200).json(updatedTravel.like.length);
+
+      } else {
+      res.status(500).json({ message: `you have already liked it` });
+      // remove the like
+    } 
+
+    
   } catch (e) {
     res.status(500).json({ message: `error occurred ${e}` });
   }
 });
 
-router.get("/likes", async (req,res) => {
+router.get("/travel-post/:id/like", async (req,res) => {
   try {
-    const allLikes = await Like.find()
+    const theTravelPost = await TravelPost.findById(req.params.id);
+    const allLikes = await Like.find({ travelPost: theTravelPost})
     console.log(allLikes)
     res.status(200).json(allLikes); 
 } catch (e) {
