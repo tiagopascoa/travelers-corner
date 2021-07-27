@@ -19,7 +19,10 @@ const travelPost = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Like"
     },
-    comments: [String],
+    comments: [{
+        user: String,
+        comment: String
+    }],
     user: {
         type: Schema.Types.ObjectId,
         ref: "User",

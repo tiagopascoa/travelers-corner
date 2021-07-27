@@ -18,11 +18,10 @@ const userSchema = new Schema({
     type: String,
     default: ""
   },
-/*   travelPosts: {
+  following: [{
     type: Schema.Types.ObjectId,
-    ref: "TravelPost"
-  } */
-
+    ref: "User",
+  }],
 });
 
 const User = model("User", userSchema);

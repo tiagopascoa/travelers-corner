@@ -22,5 +22,19 @@ router.get("/user-area", async (req, res) => {
     } 
  });
 
+ //Followers
+ router.post("/user-profile/:id/follower", async (req, res) => {
+    try{
+        const userDetail = await User.findById(req.params.id);
+
+        await User.findByIdAndUpdate(req.session.currentUser._id, {
+         $addToSet: { following: userDetail}
+        });
+        res.status(200).json(`id ${req.session.currentUser._id} was updated`);
+    } catch (e) {
+        res.status(500).json({message: `erro occurred ${e}`});
+    }
+    
+});
 
 module.exports = router;

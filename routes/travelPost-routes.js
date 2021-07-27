@@ -44,14 +44,18 @@ router.post("/new-travel-post", async (req, res) => {
 });
 
 //Create Comment
-router.post("/travel-posts/:id/comments", async (req, res) => {
+router.put("/travel-posts/:id/comments", async (req, res) => {
+  
   try {
-    const { comments } = req.body; 
+    const { comment, user } = req.body; 
     await TravelPost.findByIdAndUpdate(req.params.id, {
       $push: {
-        comments: comments
+        comments: {
+        comment: comment,
+        user: user,
+        }
       },
-    });
+    }, {new: true});
     res.status(200).json(`id ${req.params.id} was updated`);
   } catch (e) {
     res.status(500).json({ message: `error occurred ${e}` });
@@ -110,12 +114,12 @@ router.post("/travel-post/:id/like", async (req, res) => {
     const user = await User.findById(req.session.currentUser._id);
     const travelPost = await TravelPost.findById(req.params.id);
 
-     const existingLike = await Like.find({
+/*      const existingLike = await Like.find({
       user:user,
       travelPost:travelPost,
-    }); 
+    });  */
 
-     if(!existingLike){ 
+    /*  if(!existingLike){  */
       const like = await Like.create({user, travelPost});
     const updatedTravel = await TravelPost.findByIdAndUpdate(travelPost._id, {
       $push: {
@@ -124,11 +128,11 @@ router.post("/travel-post/:id/like", async (req, res) => {
     }, {new: true})
     res.status(200).json(updatedTravel.like.length);
 
-      } else {
+/*       } else {
       res.status(500).json({ message: `you have already liked it` });
       // remove the like
     } 
-
+ */
     
   } catch (e) {
     res.status(500).json({ message: `error occurred ${e}` });
