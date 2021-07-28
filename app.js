@@ -28,7 +28,7 @@ app.use(
       cookie: {
         sameSite: true, //frontend backend both run on localhost
         httpOnly: true, //we are not using https
-        maxAge: 1800000, //session time
+        maxAge: 18000000, //session time
       },
       rolling: true,
     })

@@ -6,6 +6,12 @@ const travelPost = new Schema({
         type: String,
         
     },
+    city: {
+        type: String,
+    },
+    country: {
+        type: String,
+    },
     description: {
         type: String,
         

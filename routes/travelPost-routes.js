@@ -15,14 +15,26 @@ router.get("/main", async (req, res) => {
     } catch (e) {
         res.status(500).json({message: `erro occurred ${e}`});
     }  
-}); 
+});
+
+//Get User Travel Post
+
+router.get("/user/:id/travel-posts", async (req, res) => {
+  try {
+      const userPosts = await TravelPost.find({user: req.params.id})
+      console.log(userPosts)
+      res.status(200).json(userPosts); 
+  } catch (e) {
+      res.status(500).json({message: `erro occurred ${e}`});
+  }  
+});
 
 //Create Travel Post 
 router.post("/new-travel-post", async (req, res) => {
 
-    const {location, description, tags, imageUrl, like} = req.body;
+    const {location, description, tags, imageUrl, like, city, country} = req.body;
 
-    if (!description || !location) {
+    if (!description || !city) {
         res.status(400).json({ message: "missing fields (title, description and location are required)"});
         return;
     }
@@ -30,6 +42,8 @@ router.post("/new-travel-post", async (req, res) => {
     try {
         const response = await TravelPost.create({
           location,
+          city,
+          country,
           description,
           tags,
           imageUrl,
@@ -94,10 +108,11 @@ router.get("/travel-posts/:id", async (req, res) => {
 //Update 
 router.put("/travel-posts/:id", async (req, res) => {
   try {
-    const { description, location } = req.body;
+    const { description, city, country } = req.body;
     await TravelPost.findByIdAndUpdate(req.params.id, {
       description,
-      location,
+      city,
+      country
     });
     res.status(200).json(`id ${req.params.id} was updated`);
   } catch (e) {
@@ -112,6 +127,7 @@ router.put("/travel-posts/:id", async (req, res) => {
 router.post("/travel-post/:id/like", async (req, res) => {
   try {
     const user = await User.findById(req.session.currentUser._id);
+    console.log(user)
     const travelPost = await TravelPost.findById(req.params.id);
 
 /*      const existingLike = await Like.find({
