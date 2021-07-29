@@ -127,7 +127,7 @@ router.put("/travel-posts/:id", async (req, res) => {
 router.post("/travel-post/:id/like", async (req, res) => {
   try {
     const user = await User.findById(req.session.currentUser._id);
-    console.log(user)
+    
     const travelPost = await TravelPost.findById(req.params.id);
 
 /*      const existingLike = await Like.find({
