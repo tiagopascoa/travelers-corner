@@ -22,6 +22,16 @@ router.get("/user-area/:id", async (req, res) => {
     } 
  });
 
+ //Map
+ router.get("/user-area/:id/map", async (req, res) => {
+    try {
+        const loggedUser = await User.findById(req.params.id).populate("following");
+        res.status(200).json(loggedUser); 
+    } catch (e) {
+        res.status(500).json({message: `erro occurred ${e}`});
+    } 
+ });
+
  //Followers
  router.put("/user-profile/:id/follower/:loggedUserId", async (req, res) => {
     try{
