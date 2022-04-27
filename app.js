@@ -23,24 +23,26 @@ const session = require("express-session");
 app.set("trust proxy", 1);
 
 app.use(
-    session({
-      resave: true,
-      saveUninitialized: true,
-      secret: process.env.SESSION_SECRET,
-      cookie: {
-       /* sameSite: true, */ sameSite: "none", //frontend backend both run on localhost
-       /* httpOnly: true, */ httpOnly: false, //we are not using https
-        secure: true,
-        maxAge: 18000000, //session time
-      },
-      rolling: true,
-    })
-  );
-
+  session({
+    resave: true,
+    saveUninitialized: true,
+    secret: process.env.SESSION_SECRET,
+    cookie: {
+      /* sameSite: true, //localhost
+      httpOnly: true, //localhost */
+      sameSite: "none", 
+      httpOnly: false, 
+      secure: true,
+      maxAge: 18000000, //session time
+    },
+    rolling: true,
+  })
+);
 
 // default value for title local
 const projectName = "travelers-corner-server";
-const capitalized = (string) => string[0].toUpperCase() + string.slice(1).toLowerCase();
+const capitalized = (string) =>
+  string[0].toUpperCase() + string.slice(1).toLowerCase();
 
 app.locals.title = `${capitalized(projectName)} created with IronLauncher`;
 
@@ -56,7 +58,6 @@ app.use("/api", auth);
 
 const userArea = require("./routes/user-routes");
 app.use("/api", userArea);
-
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);

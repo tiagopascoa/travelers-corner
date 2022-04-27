@@ -34,7 +34,7 @@ router.post("/new-travel-post", async (req, res) => {
 
     const {location, description, tags, imageUrl, like, city, country} = req.body;
 
-    if (!description || !city) {
+    if (!description || !city || !country) {
         res.status(400).json({ message: "missing fields (title, description and location are required)"});
         return;
     }
